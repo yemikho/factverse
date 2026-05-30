@@ -1,252 +1,605 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fun Facts</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FACTVERSE — Expand Your Universe</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
+    :root {
+      --bg: #04040a;
+      --surface: #080812;
+      --accent: #00ffe0;
+      --accent2: #ff2d6b;
+      --accent3: #ffe800;
+      --text: #eeeef5;
+      --muted: #3a3a55;
+      --glow: rgba(0,255,224,0.15);
+    }
 
-        .container {
-            max-width: 600px;
-            width: 100%;
-        }
+    html, body { height: 100%; overflow: hidden; }
 
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      cursor: none;
+      position: relative;
+    }
 
-        .header h1 {
-            color: #fff;
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+    /* Custom cursor */
+    #cursor {
+      width: 12px; height: 12px;
+      background: var(--accent);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s ease;
+      mix-blend-mode: difference;
+    }
+    #cursor-ring {
+      width: 36px; height: 36px;
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: all 0.15s ease;
+      opacity: 0.5;
+    }
 
-        .header p {
-            color: #b0b0b0;
-            font-size: 1rem;
-        }
+    /* Star canvas */
+    #starfield {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+    }
 
-        .fact-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 40px;
-            margin-bottom: 30px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            transition: all 0.3s ease;
-        }
+    /* Scanlines overlay */
+    .scanlines {
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.08) 2px,
+        rgba(0,0,0,0.08) 4px
+      );
+      pointer-events: none;
+      z-index: 1;
+    }
 
-        .fact-card:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-5px);
-            box-shadow: 0 12px 40px 0 rgba(102, 126, 234, 0.4);
-        }
+    /* Main layout */
+    .universe {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 760px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+    }
 
-        .category-label {
-            display: inline-block;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: #fff;
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 20px;
-        }
+    /* Header */
+    .header {
+      text-align: center;
+      opacity: 0;
+      animation: riseIn 0.8s cubic-bezier(0.16,1,0.3,1) forwards 0.3s;
+    }
 
-        .fact-text {
-            color: #e0e0e0;
-            font-size: 1.3rem;
-            line-height: 1.8;
-            margin-bottom: 25px;
-        }
+    .eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 5px;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+    .eyebrow::before, .eyebrow::after {
+      content: '';
+      width: 32px; height: 1px;
+      background: var(--accent);
+      opacity: 0.5;
+    }
 
-        .button-group {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-        }
+    h1 {
+      font-size: clamp(52px, 10vw, 88px);
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -2px;
+      background: linear-gradient(135deg, #fff 30%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
 
-        .btn {
-            padding: 14px 40px;
-            border: none;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+    .subtitle {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 3px;
+      margin-top: 8px;
+      text-transform: uppercase;
+    }
 
-        .btn-next {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: #fff;
-            flex-grow: 1;
-        }
+    /* Fact card */
+    .card-wrap {
+      width: 100%;
+      perspective: 1000px;
+      opacity: 0;
+      animation: riseIn 0.8s cubic-bezier(0.16,1,0.3,1) forwards 0.5s;
+    }
 
-        .btn-next:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
-        }
+    .card {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid rgba(0,255,224,0.12);
+      border-radius: 2px;
+      padding: 48px 44px 40px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.4s cubic-bezier(0.16,1,0.3,1), box-shadow 0.4s ease;
+      box-shadow: 0 0 60px rgba(0,255,224,0.04), inset 0 0 40px rgba(0,0,0,0.4);
+    }
 
-        .btn-next:active {
-            transform: translateY(0);
-        }
+    .card:hover {
+      box-shadow: 0 0 80px rgba(0,255,224,0.1), inset 0 0 40px rgba(0,0,0,0.4);
+    }
 
-        .btn-copy {
-            background: rgba(255, 255, 255, 0.1);
-            color: #e0e0e0;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
+    /* Corner decorations */
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 40px; height: 40px;
+      border-top: 2px solid var(--accent);
+      border-left: 2px solid var(--accent);
+    }
+    .card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; right: 0;
+      width: 40px; height: 40px;
+      border-bottom: 2px solid var(--accent);
+      border-right: 2px solid var(--accent);
+    }
 
-        .btn-copy:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-        }
+    .card-inner-tl {
+      position: absolute;
+      top: 0; right: 0;
+      width: 40px; height: 40px;
+      border-top: 2px solid var(--muted);
+      border-right: 2px solid var(--muted);
+      opacity: 0.4;
+    }
+    .card-inner-bl {
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 40px; height: 40px;
+      border-bottom: 2px solid var(--muted);
+      border-left: 2px solid var(--muted);
+      opacity: 0.4;
+    }
 
-        .btn-copy:active {
-            transform: translateY(0);
-        }
+    .fact-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
 
-        .counter {
-            text-align: center;
-            color: #888;
-            font-size: 0.9rem;
-            margin-top: 20px;
-        }
+    .category-badge {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      border: 1px solid currentColor;
+      border-radius: 1px;
+      transition: color 0.4s ease, border-color 0.4s ease;
+    }
 
-        @media (max-width: 600px) {
-            .header h1 {
-                font-size: 2rem;
-            }
+    .fact-index {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 2px;
+    }
 
-            .fact-card {
-                padding: 25px;
-            }
+    .fact-index span {
+      color: var(--accent);
+    }
 
-            .fact-text {
-                font-size: 1.1rem;
-            }
+    .fact-text {
+      font-size: clamp(18px, 2.8vw, 22px);
+      font-weight: 400;
+      line-height: 1.7;
+      color: var(--text);
+      min-height: 110px;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      position: relative;
+    }
 
-            .button-group {
-                flex-direction: column;
-            }
-        }
-    </style>
+    .fact-text.exit {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+
+    .fact-text.enter {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+
+    /* Glow orb inside card */
+    .glow-orb {
+      position: absolute;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, var(--glow) 0%, transparent 70%);
+      bottom: -100px; right: -80px;
+      pointer-events: none;
+      transition: background 0.6s ease;
+    }
+
+    /* Progress bar */
+    .progress-bar {
+      width: 100%;
+      height: 2px;
+      background: var(--muted);
+      margin-top: 32px;
+      border-radius: 1px;
+      overflow: hidden;
+      opacity: 0.4;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 1px;
+      transition: width 0.5s cubic-bezier(0.16,1,0.3,1);
+      width: 0%;
+    }
+
+    /* Controls */
+    .controls {
+      width: 100%;
+      display: flex;
+      gap: 12px;
+      opacity: 0;
+      animation: riseIn 0.8s cubic-bezier(0.16,1,0.3,1) forwards 0.7s;
+    }
+
+    .btn-next {
+      flex: 1;
+      background: var(--accent);
+      color: #04040a;
+      border: none;
+      padding: 20px 32px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      cursor: none;
+      border-radius: 1px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn-next::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.2);
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+    }
+
+    .btn-next:hover::before { transform: translateX(0); }
+    .btn-next:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(0,255,224,0.3);
+    }
+    .btn-next:active { transform: translateY(0); }
+
+    .btn-icon {
+      background: transparent;
+      border: 1px solid var(--muted);
+      color: var(--muted);
+      width: 60px;
+      cursor: none;
+      border-radius: 1px;
+      font-size: 18px;
+      transition: border-color 0.2s, color 0.2s, transform 0.2s;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .btn-icon:hover {
+      border-color: var(--accent2);
+      color: var(--accent2);
+      transform: translateY(-2px);
+    }
+
+    /* Footer */
+    .footer {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 2px;
+      text-align: center;
+      opacity: 0;
+      animation: riseIn 0.8s ease forwards 0.9s;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      background: var(--accent2);
+      color: #fff;
+      padding: 12px 28px;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      border-radius: 1px;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+      pointer-events: none;
+      z-index: 1000;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Particle burst */
+    .particle {
+      position: fixed;
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 500;
+      animation: burst 0.8s ease forwards;
+    }
+    @keyframes burst {
+      0% { transform: translate(0,0) scale(1); opacity: 1; }
+      100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🎯 Fun Facts</h1>
-            <p>Discover amazing facts every day</p>
-        </div>
 
-        <div class="fact-card">
-            <span class="category-label" id="category">Science</span>
-            <p class="fact-text" id="fact">Loading an amazing fact...</p>
-            <div class="button-group">
-                <button class="btn btn-next" id="nextBtn">Next Fact</button>
-                <button class="btn btn-copy" id="copyBtn">Copy</button>
-            </div>
-            <div class="counter">
-                <span id="counter">Fact 1 of 30</span>
-            </div>
-        </div>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<canvas id="starfield"></canvas>
+<div class="scanlines"></div>
+
+<div class="universe">
+  <div class="header">
+    <div class="eyebrow">Random Facts Engine</div>
+    <h1>FACTVERSE</h1>
+    <div class="subtitle">// Expand Your Universe //</div>
+  </div>
+
+  <div class="card-wrap">
+    <div class="card" id="card">
+      <div class="card-inner-tl"></div>
+      <div class="card-inner-bl"></div>
+      <div class="glow-orb" id="glowOrb"></div>
+
+      <div class="fact-meta">
+        <div class="category-badge" id="catBadge">Space</div>
+        <div class="fact-index"><span id="currentIdx">01</span> / <span id="totalIdx">15</span></div>
+      </div>
+
+      <p class="fact-text" id="factText">
+        There are more stars in the universe than grains of sand on all of Earth's beaches combined — an estimated 1 septillion stars.
+      </p>
+
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
     </div>
+  </div>
 
-    <script>
-        const facts = [
-            { text: "Honey never spoils. Archaeologists have found 3,000-year-old honey in Egyptian tombs that was still edible.", category: "Science" },
-            { text: "A group of flamingos is called a 'flamboyance'.", category: "Animals" },
-            { text: "The Great Wall of China is not visible from space with the naked eye.", category: "History" },
-            { text: "Octopuses have three hearts and blue blood.", category: "Animals" },
-            { text: "A single bolt of lightning is hotter than the surface of the sun.", category: "Science" },
-            { text: "Cleopatra lived closer to the moon landing than to the construction of the Great Pyramid.", category: "History" },
-            { text: "Bananas are berries, but strawberries are not.", category: "Science" },
-            { text: "A group of crows is called a 'murder'.", category: "Animals" },
-            { text: "The Eiffel Tower can be 15 cm taller in summer due to thermal expansion of the metal.", category: "Engineering" },
-            { text: "Dolphins have names for each other.", category: "Animals" },
-            { text: "Your body contains about 37.2 trillion cells.", category: "Science" },
-            { text: "The shortest war in history lasted only 38 to 45 minutes.", category: "History" },
-            { text: "A mantis shrimp can punch with the force of a .22 caliber bullet.", category: "Animals" },
-            { text: "The fingerprints of koalas are so similar to human fingerprints that they could confuse crime scene investigations.", category: "Animals" },
-            { text: "Venus rotates backwards compared to most planets in our solar system.", category: "Science" },
-            { text: "Tardigrades (water bears) can survive in the vacuum of space.", category: "Animals" },
-            { text: "A jiffy is an actual unit of time: 1/100th of a second.", category: "Science" },
-            { text: "Cats have over 30 muscles in each ear.", category: "Animals" },
-            { text: "The Great Wall of China required about 2,000 years to build.", category: "History" },
-            { text: "A gallon of honey requires the nectar from about 2 million flowers.", category: "Science" },
-            { text: "Penguins have knees; they're just hidden under their feathers.", category: "Animals" },
-            { text: "The first webcam was used to monitor a coffee pot at Cambridge University.", category: "Technology" },
-            { text: "Parmesan cheese and parmigiano-reggiano are different: only cheese from a specific region qualifies.", category: "Food" },
-            { text: "A day on Venus is longer than its year.", category: "Science" },
-            { text: "Wombat droppings are cube-shaped to prevent them from rolling away.", category: "Animals" },
-            { text: "The only mammal that can't jump is the elephant.", category: "Animals" },
-            { text: "In Japan, there is a train station that exists for only one passenger.", category: "Travel" },
-            { text: "The smell of lavender can reduce anxiety by up to 25%.", category: "Science" },
-            { text: "There's a type of jellyfish that is biologically immortal.", category: "Animals" },
-            { text: "Sloths only defecate once a week.", category: "Animals" }
-        ];
+  <div class="controls">
+    <button class="btn-next" id="btnNext" onclick="nextFact()">Blow My Mind Again →</button>
+    <button class="btn-icon" onclick="copyFact()" title="Copy">⎘</button>
+    <button class="btn-icon" onclick="shuffleFacts()" title="Shuffle">⇄</button>
+  </div>
 
-        let currentIndex = 0;
+  <div class="footer">[ press anywhere or hit space to continue ]</div>
+</div>
 
-        function displayFact() {
-            const fact = facts[currentIndex];
-            document.getElementById('fact').textContent = fact.text;
-            document.getElementById('category').textContent = fact.category;
-            document.getElementById('counter').textContent = `Fact ${currentIndex + 1} of ${facts.length}`;
-        }
+<div class="toast" id="toast">// Fact copied to clipboard</div>
 
-        function nextFact() {
-            currentIndex = (currentIndex + 1) % facts.length;
-            displayFact();
-        }
+<script>
+  // --- Cursor ---
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursor-ring');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx + 'px';
+    cursor.style.top = my + 'px';
+  });
+  (function animRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) *.12;
+    ring.style.left = rx + 'px';
+    ring.style.top = ry + 'px';
+    requestAnimationFrame(animRing);
+  })();
 
-        function copyFact() {
-            const factText = document.getElementById('fact').textContent;
-            const category = document.getElementById('category').textContent;
-            const textToCopy = `${category}: ${factText}`;
-            
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                const btn = document.getElementById('copyBtn');
-                const originalText = btn.textContent;
-                btn.textContent = 'Copied!';
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                }, 2000);
-            });
-        }
+  // --- Starfield ---
+  const canvas = document.getElementById('starfield');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  function initStars() {
+    stars = [];
+    for (let i = 0; i < 180; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.2,
+        speed: Math.random() * 0.3 + 0.05,
+        opacity: Math.random() * 0.7 + 0.1,
+        twinkle: Math.random() * Math.PI * 2
+      });
+    }
+  }
+  function drawStars(ts) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    stars.forEach(s => {
+      s.twinkle += 0.02;
+      s.y += s.speed;
+      if (s.y > canvas.height) { s.y = 0; s.x = Math.random() * canvas.width; }
+      const op = s.opacity * (0.6 + 0.4 * Math.sin(s.twinkle));
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(200,220,255,${op})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(drawStars);
+  }
+  resizeCanvas(); initStars(); requestAnimationFrame(drawStars);
+  window.addEventListener('resize', () => { resizeCanvas(); initStars(); });
 
-        document.getElementById('nextBtn').addEventListener('click', nextFact);
-        document.getElementById('copyBtn').addEventListener('click', copyFact);
+  // --- Facts ---
+  const facts = [
+    { cat: "Space", color: "#00ffe0", text: "There are more stars in the universe than grains of sand on all of Earth's beaches combined — an estimated 1 septillion stars.", glow: "rgba(0,255,224,0.12)" },
+    { cat: "Biology", color: "#ff2d6b", text: "Your body replaces 98% of its atoms every year. The person you were last year is literally not the same person, atom for atom.", glow: "rgba(255,45,107,0.1)" },
+    { cat: "Physics", color: "#ffe800", text: "If you removed all the empty space from atoms in every human on Earth, all 8 billion of us would fit inside a sugar cube.", glow: "rgba(255,232,0,0.1)" },
+    { cat: "History", color: "#00ffe0", text: "Cleopatra lived closer in time to the Moon landing than to the construction of the Great Pyramid of Giza.", glow: "rgba(0,255,224,0.12)" },
+    { cat: "Animals", color: "#ff2d6b", text: "Octopuses have three hearts, blue blood, nine brains, and can edit their own RNA in real time to adapt to temperature changes.", glow: "rgba(255,45,107,0.1)" },
+    { cat: "Math", color: "#ffe800", text: "There are more possible iterations of a chess game than atoms in the observable universe — by a factor too large to comprehend.", glow: "rgba(255,232,0,0.1)" },
+    { cat: "Space", color: "#00ffe0", text: "A day on Venus is longer than a year on Venus. It rotates so slowly that the Sun rises in the west and sets in the east.", glow: "rgba(0,255,224,0.12)" },
+    { cat: "Psychology", color: "#ff2d6b", text: "The brain can't actually multitask. What you experience as multitasking is your brain switching tasks rapidly — and losing efficiency each time.", glow: "rgba(255,45,107,0.1)" },
+    { cat: "Nature", color: "#ffe800", text: "Honey never spoils. Archaeologists found 3,000-year-old honey in Egyptian tombs — still perfectly edible.", glow: "rgba(255,232,0,0.1)" },
+    { cat: "Biology", color: "#00ffe0", text: "Your stomach lining replaces itself every 3-4 days. Without this, your stomach acid would digest the stomach itself.", glow: "rgba(0,255,224,0.12)" },
+    { cat: "Tech", color: "#ff2d6b", text: "The first computer bug was a literal bug — a moth trapped inside the Harvard Mark II relay in 1947, found by Grace Hopper's team.", glow: "rgba(255,45,107,0.1)" },
+    { cat: "History", color: "#ffe800", text: "Nintendo was founded in 1889 as a playing card company — 80 years before the first Moon landing.", glow: "rgba(255,232,0,0.1)" },
+    { cat: "Animals", color: "#00ffe0", text: "Crows can recognise human faces, remember people who wronged them for years, and teach their offspring to avoid those specific people.", glow: "rgba(0,255,224,0.12)" },
+    { cat: "Physics", color: "#ff2d6b", text: "Hot water can freeze faster than cold water under certain conditions. This is called the Mpemba effect — and scientists still can't fully explain why.", glow: "rgba(255,45,107,0.1)" },
+    { cat: "Space", color: "#ffe800", text: "The light hitting your eyes right now from the Sun left 8 minutes and 20 seconds ago. You are always watching the past.", glow: "rgba(255,232,0,0.1)" },
+  ];
 
-        // Initialize with first fact
-        displayFact();
-    </script>
+  let order = [...Array(facts.length).keys()].sort(() => Math.random() - 0.5);
+  let idx = 0;
+
+  function updateCard(fact, num) {
+    document.getElementById('catBadge').textContent = fact.cat;
+    document.getElementById('catBadge').style.color = fact.color;
+    document.getElementById('catBadge').style.borderColor = fact.color;
+    document.getElementById('glowOrb').style.background = `radial-gradient(circle, ${fact.glow} 0%, transparent 70%)`;
+    document.getElementById('currentIdx').textContent = String(num + 1).padStart(2, '0');
+    document.getElementById('progressFill').style.width = `${((num + 1) / facts.length) * 100}%`;
+    document.getElementById('totalIdx').textContent = String(facts.length).padStart(2, '0');
+  }
+
+  // Init
+  updateCard(facts[order[0]], 0);
+
+  function nextFact() {
+    const textEl = document.getElementById('factText');
+    textEl.classList.add('exit');
+
+    // Particle burst
+    spawnParticles();
+
+    setTimeout(() => {
+      idx = (idx + 1) % facts.length;
+      const fact = facts[order[idx]];
+      textEl.textContent = fact.text;
+      textEl.classList.remove('exit');
+      textEl.classList.add('enter');
+      updateCard(fact, idx);
+      setTimeout(() => textEl.classList.remove('enter'), 50);
+    }, 260);
+  }
+
+  function shuffleFacts() {
+    order = [...Array(facts.length).keys()].sort(() => Math.random() - 0.5);
+    idx = 0;
+    nextFact();
+  }
+
+  function copyFact() {
+    const text = document.getElementById('factText').textContent.trim();
+    navigator.clipboard.writeText(text).then(() => {
+      const t = document.getElementById('toast');
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2200);
+    });
+  }
+
+  // Keyboard & click
+  document.addEventListener('keydown', e => { if (e.code === 'Space' || e.code === 'ArrowRight') { e.preventDefault(); nextFact(); } });
+
+  // Particle burst
+  function spawnParticles() {
+    const btn = document.getElementById('btnNext');
+    const rect = btn.getBoundingClientRect();
+    const colors = ['#00ffe0', '#ff2d6b', '#ffe800', '#ffffff'];
+    for (let i = 0; i < 18; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      const angle = (Math.PI * 2 * i) / 18;
+      const dist = 60 + Math.random() * 60;
+      p.style.cssText = `
+        left: ${rect.left + rect.width / 2}px;
+        top: ${rect.top + rect.height / 2}px;
+        background: ${colors[Math.floor(Math.random() * colors.length)]};
+        --tx: ${Math.cos(angle) * dist}px;
+        --ty: ${Math.sin(angle) * dist}px;
+        animation-duration: ${0.5 + Math.random() * 0.4}s;
+      `;
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 900);
+    }
+  }
+
+  // Card tilt on mouse move
+  const card = document.getElementById('card');
+  document.addEventListener('mousemove', e => {
+    const rect = card.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = (e.clientX - cx) / (rect.width / 2);
+    const dy = (e.clientY - cy) / (rect.height / 2);
+    card.style.transform = `rotateY(${dx * 4}deg) rotateX(${-dy * 4}deg)`;
+  });
+  document.addEventListener('mouseleave', () => {
+    card.style.transform = 'rotateY(0deg) rotateX(0deg)';
+  });
+</script>
 </body>
 </html>
