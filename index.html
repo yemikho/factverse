@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fun Facts</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #fff;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #b0b0b0;
+            font-size: 1rem;
+        }
+
+        .fact-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            transition: all 0.3s ease;
+        }
+
+        .fact-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px 0 rgba(102, 126, 234, 0.4);
+        }
+
+        .category-label {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        .fact-text {
+            color: #e0e0e0;
+            font-size: 1.3rem;
+            line-height: 1.8;
+            margin-bottom: 25px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 14px 40px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            flex-grow: 1;
+        }
+
+        .btn-next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-next:active {
+            transform: translateY(0);
+        }
+
+        .btn-copy {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-copy:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-copy:active {
+            transform: translateY(0);
+        }
+
+        .counter {
+            text-align: center;
+            color: #888;
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .fact-card {
+                padding: 25px;
+            }
+
+            .fact-text {
+                font-size: 1.1rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Fun Facts</h1>
+            <p>Discover amazing facts every day</p>
+        </div>
+
+        <div class="fact-card">
+            <span class="category-label" id="category">Science</span>
+            <p class="fact-text" id="fact">Loading an amazing fact...</p>
+            <div class="button-group">
+                <button class="btn btn-next" id="nextBtn">Next Fact</button>
+                <button class="btn btn-copy" id="copyBtn">Copy</button>
+            </div>
+            <div class="counter">
+                <span id="counter">Fact 1 of 30</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const facts = [
+            { text: "Honey never spoils. Archaeologists have found 3,000-year-old honey in Egyptian tombs that was still edible.", category: "Science" },
+            { text: "A group of flamingos is called a 'flamboyance'.", category: "Animals" },
+            { text: "The Great Wall of China is not visible from space with the naked eye.", category: "History" },
+            { text: "Octopuses have three hearts and blue blood.", category: "Animals" },
+            { text: "A single bolt of lightning is hotter than the surface of the sun.", category: "Science" },
+            { text: "Cleopatra lived closer to the moon landing than to the construction of the Great Pyramid.", category: "History" },
+            { text: "Bananas are berries, but strawberries are not.", category: "Science" },
+            { text: "A group of crows is called a 'murder'.", category: "Animals" },
+            { text: "The Eiffel Tower can be 15 cm taller in summer due to thermal expansion of the metal.", category: "Engineering" },
+            { text: "Dolphins have names for each other.", category: "Animals" },
+            { text: "Your body contains about 37.2 trillion cells.", category: "Science" },
+            { text: "The shortest war in history lasted only 38 to 45 minutes.", category: "History" },
+            { text: "A mantis shrimp can punch with the force of a .22 caliber bullet.", category: "Animals" },
+            { text: "The fingerprints of koalas are so similar to human fingerprints that they could confuse crime scene investigations.", category: "Animals" },
+            { text: "Venus rotates backwards compared to most planets in our solar system.", category: "Science" },
+            { text: "Tardigrades (water bears) can survive in the vacuum of space.", category: "Animals" },
+            { text: "A jiffy is an actual unit of time: 1/100th of a second.", category: "Science" },
+            { text: "Cats have over 30 muscles in each ear.", category: "Animals" },
+            { text: "The Great Wall of China required about 2,000 years to build.", category: "History" },
+            { text: "A gallon of honey requires the nectar from about 2 million flowers.", category: "Science" },
+            { text: "Penguins have knees; they're just hidden under their feathers.", category: "Animals" },
+            { text: "The first webcam was used to monitor a coffee pot at Cambridge University.", category: "Technology" },
+            { text: "Parmesan cheese and parmigiano-reggiano are different: only cheese from a specific region qualifies.", category: "Food" },
+            { text: "A day on Venus is longer than its year.", category: "Science" },
+            { text: "Wombat droppings are cube-shaped to prevent them from rolling away.", category: "Animals" },
+            { text: "The only mammal that can't jump is the elephant.", category: "Animals" },
+            { text: "In Japan, there is a train station that exists for only one passenger.", category: "Travel" },
+            { text: "The smell of lavender can reduce anxiety by up to 25%.", category: "Science" },
+            { text: "There's a type of jellyfish that is biologically immortal.", category: "Animals" },
+            { text: "Sloths only defecate once a week.", category: "Animals" }
+        ];
+
+        let currentIndex = 0;
+
+        function displayFact() {
+            const fact = facts[currentIndex];
+            document.getElementById('fact').textContent = fact.text;
+            document.getElementById('category').textContent = fact.category;
+            document.getElementById('counter').textContent = `Fact ${currentIndex + 1} of ${facts.length}`;
+        }
+
+        function nextFact() {
+            currentIndex = (currentIndex + 1) % facts.length;
+            displayFact();
+        }
+
+        function copyFact() {
+            const factText = document.getElementById('fact').textContent;
+            const category = document.getElementById('category').textContent;
+            const textToCopy = `${category}: ${factText}`;
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const btn = document.getElementById('copyBtn');
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        }
+
+        document.getElementById('nextBtn').addEventListener('click', nextFact);
+        document.getElementById('copyBtn').addEventListener('click', copyFact);
+
+        // Initialize with first fact
+        displayFact();
+    </script>
+</body>
+</html>
